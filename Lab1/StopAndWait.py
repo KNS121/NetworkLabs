@@ -1,105 +1,78 @@
 import hashlib
 import time
+import random
 
 data = "Hello worldaa"
 package_data_size = 2
 
-
 def CalculateHashSum(data):
     return hashlib.sha256(data.encode()).hexdigest()
 
-
-def msg_to_packeges(data):
-
+def msg_to_packages(data):
     packages = []
+    #package_number = 0
+    
 
-    for i in range(0,len(data), package_data_size):
+    for i in range(0, len(data), package_data_size):
 
-        package_nubmer = (i//package_data_size)%2
-
+        package_number = (i//package_data_size)%2
+        
         package = {
-            "seq_num": package_nubmer,
+            "seq_num": package_number,
             "hash_sum": CalculateHashSum(data[i:i+package_data_size]),
             "data": data[i:i+package_data_size]
         }
-
         packages.append(package)
-
-
+    
     return packages
 
-
-#print(msg_to_packeges(data))
-
-#class Sender:
-
-#    def __init__(self):
-#        
-#        self.check_ack = False
-#        self.check_time = True
-
-
-#    def send_package(package):
-        
-#        while 
-
-
-
 def Sender(data):
-    packages = msg_to_packeges(data)
+    packages = msg_to_packages(data)
+    
+    for package in packages:
+        ack_received = False
+        
+        while not ack_received:
 
-    #package_index = 0
+            print(f"Отправка пакета {package}")
+            
+            # Отправляем пакет и получаем ACK
+            ack_received = Reciever(package)
+            
+            if ack_received:
+                print(f"Пакет {package} подтвержден")
 
-    for i in range(len(packages)):
-
-        package = packages[i]
-        check_package = False
-
-        start_time = time.time()
-
-        print(f"start_time {start_time}")
-
-        timedelta = 2
-
-        while (timedelta > 0.5):
-            print(package)
-            Reciever(package)            
-            check_package = Reciever(package)
-            timedelta = time.time() - start_time
-
+            else:
+                print(f"Таймаут для пакета {package}, повторная отправка...")
+                # Ждем перед повторной отправкой
+                time.sleep(0.5)
+    
+    print("\nВсе пакеты успешно отправлены!")
 
 
 def Reciever(package):
-    check_hash_sum = False
+    # Имитация потери пакета (30% вероятность)
+    if random.random() < 0.3:
+        print("  Пакет потерян!")
+        return False
+    
+    # Проверка контрольной суммы
+    if CalculateHashSum(package["data"]) == package["hash_sum"]:
+        # Имитация задержки сети
+        network_delay = random.random() * 0.8
+        time.sleep(network_delay)
+        
+        if network_delay < 0.5:  # ACK пришел вовремя
+            print(f"  Пакет {package} принят, отправка ACK")
+            return True
+        else:  # ACK опоздал
+            print(f"  Пакет {package} принят, но ACK опоздал")
+            return False
+    else:
+        print("  Ошибка контрольной суммы!")
+        return False
 
-    if CalculateHashSum(package["data"]) == package["hash_sum"] :
-        check_hash_sum = True
-
-    time.sleep(0.2)
-
-    print(check_hash_sum)
-
-    return check_hash_sum
-
-
-Sender(data)
-
-
-
-
-
-#packet1 = {
-##    "seq_number": 1,
-#    "hash_sum": hashlib.sha256(b"{data1}").hexdigest(),
-#    "data": data1
-#}
-
-#packet2 = {
-#    "seq_number": 1,
-#    "hash_sum": hashlib.sha256(b"{data2}").hexdigest(),
-#    "data": data1
-#}
-
-
-
-#print([packet1, packet2])
+# Запуск
+print("Начало передачи данных...")
+sent = Sender(data)
+print(f"\nУспешно отправлено пакетов: {len(sent)}")
