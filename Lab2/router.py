@@ -19,7 +19,6 @@ class Router:
         self.connections.append(link)
     
     def send_hello(self):
-        """Отправка HELLO-пакетов всем соседям"""
         for link in self.connections:
             if link.is_active:
                 other_end = link.get_other_end(self.router_id)
@@ -32,7 +31,6 @@ class Router:
                 link.send_message(hello_msg, self.router_id)
     
     def receive_message(self, message: Message):
-        """Обработка входящих сообщений"""
         if not self.is_active:
             return
         
@@ -46,7 +44,6 @@ class Router:
             self._process_data(message)
     
     def _process_hello(self, message: Message):
-        """Обработка HELLO-пакета"""
         if message.sender_id in self.received_hellos:
             return
             
@@ -58,7 +55,6 @@ class Router:
         print(f"Router {self.router_id}: learned neighbor {message.sender_id} with cost {cost:.3f}")
     
     def _get_link_cost(self, neighbor_id: int) -> float:
-        """Получает стоимость соединения с соседом из соответствующего линка"""
         for link in self.connections:
             other_end = link.get_other_end(self.router_id)
             if other_end == neighbor_id:
@@ -66,7 +62,6 @@ class Router:
         return 1.0  # стоимость по умолчанию
         
     def _process_topology(self, message: Message):
-        """Обработка топологии от выделенного маршрутизатора"""
         self.lsdb = message.data.copy()
         
         # Добавляем собственную информацию в LSDB
@@ -75,7 +70,6 @@ class Router:
         self._compute_shortest_paths()
     
     def _process_data(self, message: Message):
-        """Обработка данных"""
         if message.receiver_id == self.router_id:
             print(f"Router {self.router_id}: received final message: {message.data}")
         else:
@@ -92,7 +86,6 @@ class Router:
                 self._send_to_neighbor(next_hop, new_msg)
     
     def _compute_shortest_paths(self):
-        """Вычисление кратчайших путей алгоритмом Дейкстры"""
         distances = {self.router_id: 0}
         previous = {}
         pq = [(0, self.router_id)]

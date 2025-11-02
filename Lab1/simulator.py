@@ -1,10 +1,10 @@
 import time
-from sender import Sender
-from receiver import Receiver
+from sender import Sender, SelectiveRepeatSender
+from receiver import Receiver, SelectiveRepeatReceiver
 from network import NetworkSimulator
 
 class ProtocolSimulator:
-    def __init__(self, data: str, window_size: int = 1, **kwargs):
+    def __init__(self, data: str, window_size: int = 1, protocol_type: str = "auto", **kwargs):
         self.data = data
         
         package_data_size = kwargs.get('package_data_size', 2)
@@ -13,8 +13,21 @@ class ProtocolSimulator:
         ack_loss = kwargs.get('ack_loss_prob', 0.1)
         corruption = kwargs.get('corruption_prob', 0.1)
         
-        self.sender = Sender(data, package_data_size, window_size, timeout)
-        self.receiver = Receiver(package_data_size)
+        # Определяем тип протокола автоматически или по указанию
+        if protocol_type == "auto":
+            if window_size == 1:
+                protocol_type = "stop_and_wait"
+            else:
+                protocol_type = "go_back_n"
+        
+        # Создаем отправителя и получателя в зависимости от типа протокола
+        if protocol_type == "selective_repeat":
+            self.sender = SelectiveRepeatSender(data, package_data_size, window_size, timeout)
+            self.receiver = SelectiveRepeatReceiver(package_data_size, window_size)
+        else:
+            self.sender = Sender(data, package_data_size, window_size, timeout)
+            self.receiver = Receiver(package_data_size)
+            
         self.network = NetworkSimulator(packet_loss, ack_loss, corruption)
         
         self.stats = {
@@ -30,9 +43,10 @@ class ProtocolSimulator:
         start_time = time.time()
         iteration = 0
         
-        while not self.sender.all_packets_confirmed() :
-            #iteration += 1
+        while not self.sender.all_packets_confirmed():
+            iteration += 1
 
+            # Проверка таймаутов и повторная отправка
             resent_packets = self.sender.check_timeout()
             for packet in resent_packets:
                 self.network.transmit_packet(packet)
@@ -58,9 +72,13 @@ class ProtocolSimulator:
         self.stats['iterations'] = iteration
         self.stats['total_time'] = time.time() - start_time
         self.stats['total_sent'] = self.sender.stats['total_sent']
-        self.stats['retransmissions'] = self.sender.stats['retransmissions']
-        self.stats['efficiency'] = len(self.data) / self.sender.stats['total_sent'] if self.sender.stats['total_sent'] > 0 else 0
+        useful_packets = len(self.data) // self.sender.package_data_size
         
+        if useful_packets > 0:
+            self.stats['efficiency'] = useful_packets / self.sender.stats['total_sent']
+        else:
+            self.stats['efficiency'] = 0
+    
         received_data = self.receiver.get_reassembled_data()
         success = self.data == received_data
         

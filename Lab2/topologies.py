@@ -125,7 +125,7 @@ def simulate_topology(routers, dr, topology_name):
     
     # Имитация разрыва связи
     print("\n4. ТЕСТ УСТОЙЧИВОСТИ К РАЗРЫВАМ:")
-    print("ААААААААААААААААА Разрыв связи с маршрутизатором 2")
+    print("Разрыв связи с маршрутизатором 2")
     if 2 in dr.routers:
         dr.routers[2].is_active = False
         # Обновляем топологию

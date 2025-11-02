@@ -36,7 +36,7 @@ Router 4: computed routing table: {3: (3, 1.0)}
 НЕУДАЧА: Router 1 не может отправить данные Router 3
 
 4. ТЕСТ УСТОЙЧИВОСТИ К РАЗРЫВАМ:
-ААААААААААААААААА Разрыв связи с маршрутизатором 2
+Разрыв связи с маршрутизатором 2
 Router 0: computed routing table: {1: (1, 1.0), 2: (1, 6.0)}
 Router 1: computed routing table: {0: (0, 1.0), 2: (2, 5.0)}
 Router 3: computed routing table: {4: (4, 1.0)}
@@ -153,7 +153,7 @@ Router 3: received final message: ['via_0', 'via_4']
 УСПЕХ: Router 1 отправил данные Router 3
 
 4. ТЕСТ УСТОЙЧИВОСТИ К РАЗРЫВАМ:
-ААААААААААААААААА Разрыв связи с маршрутизатором 2
+Разрыв связи с маршрутизатором 2
 Router 0: computed routing table: {1: (1, 1.0), 2: (4, 4.0), 3: (4, 3.0), 4: (4, 2.0)}
 Router 1: computed routing table: {0: (0, 1.0), 2: (2, 5.0), 3: (0, 4.0), 4: (0, 3.0)}
 Router 3: computed routing table: {0: (4, 3.0), 1: (4, 4.0), 2: (2, 1.0), 4: (4, 1.0)}

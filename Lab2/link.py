@@ -20,7 +20,6 @@ class Link:
         return self.router2_id if router_id == self.router1_id else self.router1_id
     
     def get_cost(self) -> float:
-        """Возвращает стоимость соединения"""
         return self.cost
     
     def send_message(self, message: Message, sender_id: int):
